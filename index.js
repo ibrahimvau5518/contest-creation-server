@@ -212,3 +212,60 @@ app.put('/sendMassage/:id', async (req, res) => {
     )
   );
 });
+
+// =======================
+//   Contest Registration
+// =======================
+
+// Register for contest
+app.post('/register/contest', async (req, res) => {
+  const contestDetails = req.body;
+  const result = await registerCollection.insertOne(contestDetails);
+  res.send(result);
+});
+
+// Registered contest for user
+app.get('/getRegisterContest/:email', async (req, res) => {
+  const email = req.params.email;
+  const result = await registerCollection.find({ email }).toArray();
+  res.send(result);
+});
+
+// Get single registered contest
+app.get('/getSingleContest/:id', async (req, res) => {
+  const id = req.params.id;
+  const result = await registerCollection.findOne({ _id: new ObjectId(id) });
+  res.send(result);
+});
+
+
+// =======================
+//      Stripe Payment
+// =======================
+
+app.post('/create-payment-intent', async (req, res) => {
+  const { price } = req.body;
+
+  const amount = parseInt(price * 100);
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amount,
+    currency: "usd",
+    payment_method_types: ["card"]
+  });
+
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  });
+});
+
+// Save payment
+app.post('/payments', async (req, res) => {
+  const payment = req.body;
+  const paymentResult = await paymentsCollection.insertOne(payment);
+
+  const query = { _id: new ObjectId(payment.registerId) };
+  const deleteResult = await registerCollection.deleteOne(query);
+
+  res.send({ paymentResult, deleteResult });
+});
