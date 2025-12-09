@@ -84,3 +84,62 @@ const verifyAdmin = async (req, res, next) => {
   }
   next();
 };
+
+
+app.post('/users', async (req, res) => {
+  const users = req.body;
+  const query = { email: users.email };
+  const existing = await userCollection.findOne(query);
+  if (existing) {
+    return res.send({ massage: 'already available' });
+  }
+  const result = await userCollection.insertOne(users);
+  res.send(result);
+});
+
+app.get('/users', async (req, res) => {
+  const page = parseInt(req.query.page);
+  const size = parseInt(req.query.size);
+  const result = await userCollection
+    .find()
+    .skip(page * size)
+    .limit(size)
+    .toArray();
+  res.send(result);
+});
+
+app.get('/users/:email', async (req, res) => {
+  const query = { email: req.params.email };
+  const result = await userCollection.findOne(query);
+  res.send({ position: result?.role });
+});
+
+app.get('/users/verified/:email', async (req, res) => {
+  const query = { email: req.params.email };
+  const result = await userCollection.findOne(query);
+  res.send({ permission: result?.status });
+});
+
+app.get('/user/:id', async (req, res) => {
+  const query = { _id: new ObjectId(req.params.id) };
+  const result = await userCollection.findOne(query);
+  res.send(result);
+});
+
+app.put('/update/user/role/:id', verifyToken, verifyAdmin, async (req, res) => {
+  const query = { _id: new ObjectId(req.params.id) };
+  const updateDoc = { $set: { role: req.body?.newRole } };
+  res.send(await userCollection.updateOne(query, updateDoc));
+});
+
+app.put('/block/user/:id', verifyToken, verifyAdmin, async (req, res) => {
+  const query = { _id: new ObjectId(req.params.id) };
+  const updateDoc = { $set: { status: req.body?.newStatus } };
+  res.send(await userCollection.updateOne(query, updateDoc));
+});
+
+app.delete('/delete/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+  res.send(
+    await userCollection.deleteOne({ _id: new ObjectId(req.params.id) })
+  );
+});
