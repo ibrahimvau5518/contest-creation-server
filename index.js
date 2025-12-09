@@ -143,3 +143,72 @@ app.delete('/delete/users/:id', verifyToken, verifyAdmin, async (req, res) => {
     await userCollection.deleteOne({ _id: new ObjectId(req.params.id) })
   );
 });
+
+app.post('/host/contest', async (req, res) => {
+  res.send(await creatorCollection.insertOne(req.body));
+});
+
+app.get('/host/contest/:email', async (req, res) => {
+  const page = parseInt(req.query.page);
+  const size = parseInt(req.query.size);
+  const query = { hostEmail: req.params.email };
+  res.send(
+    await creatorCollection
+      .find(query)
+      .skip(page * size)
+      .limit(size)
+      .toArray()
+  );
+});
+
+app.get('/single/contest/:id', async (req, res) => {
+  res.send(
+    await creatorCollection.findOne({ _id: new ObjectId(req.params.id) })
+  );
+});
+
+app.put('/updateSingleData/:id', async (req, res) => {
+  const updateDoc = { $set: req.body };
+  res.send(
+    await creatorCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      updateDoc
+    )
+  );
+});
+
+app.delete('/delete/creator/collection/:id', async (req, res) => {
+  res.send(
+    await creatorCollection.deleteOne({ _id: new ObjectId(req.params.id) })
+  );
+});
+
+app.get('/allContes/for/Admin', verifyToken, verifyAdmin, async (req, res) => {
+  const page = parseInt(req.query.page);
+  const size = parseInt(req.query.size);
+  res.send(
+    await creatorCollection
+      .find()
+      .skip(page * size)
+      .limit(size)
+      .toArray()
+  );
+});
+
+app.post('/add/allContest', async (req, res) => {
+  const id = req.body?._id;
+  const updateDoc = { $set: { status: 'accepted' } };
+  res.send(
+    await creatorCollection.updateOne({ _id: new ObjectId(id) }, updateDoc)
+  );
+});
+
+app.put('/sendMassage/:id', async (req, res) => {
+  const updateDoc = { $set: { comments: req.body?.comment } };
+  res.send(
+    await creatorCollection.updateOne(
+      { _id: new ObjectId(req.params.id) },
+      updateDoc
+    )
+  );
+});
