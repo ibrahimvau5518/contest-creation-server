@@ -213,10 +213,6 @@ app.put('/sendMassage/:id', async (req, res) => {
   );
 });
 
-// =======================
-//   Contest Registration
-// =======================
-
 // Register for contest
 app.post('/register/contest', async (req, res) => {
   const contestDetails = req.body;
@@ -239,10 +235,7 @@ app.get('/getSingleContest/:id', async (req, res) => {
 });
 
 
-// =======================
-//      Stripe Payment
-// =======================
-
+//Stripe Payment
 app.post('/create-payment-intent', async (req, res) => {
   const { price } = req.body;
 
@@ -271,10 +264,7 @@ app.post('/payments', async (req, res) => {
 });
 
 
-// =======================
-//     Result Publish
-// =======================
-
+// Result Publish
 app.post('/setResult', async (req, res) => {
   const resultData = req.body;
   const result = await winCollection.insertOne(resultData);
@@ -311,10 +301,7 @@ app.get('/leaderBoard', async (req, res) => {
   res.send(result);
 });
 
-// =======================
-//     My Participations
-// =======================
-
+// My Participations
 app.get('/myParticipateData/:email', async (req, res) => {
   const email = req.params.email;
   const result = await paymentsCollection.find({ email }).toArray();
@@ -322,10 +309,7 @@ app.get('/myParticipateData/:email', async (req, res) => {
 });
 
 
-// =======================
-//       My Profile
-// =======================
-
+//  My Profile
 app.get('/user/myProfile/:email', async (req, res) => {
   const email = req.params.email;
 
@@ -344,10 +328,6 @@ app.patch('/update/profile/:email', async (req, res) => {
   res.send(result);
 });
 
-
-// =======================
-//     Dashboard Stats
-// =======================
 
 // Upcoming contests
 app.get('/upcoming', async (req, res) => {
@@ -383,4 +363,12 @@ app.get('/count/my/contest/:email', async (req, res) => {
   const total = await paymentsCollection.countDocuments({ email });
 
   res.send({ total });
+});
+
+app.get('/', (req, res) => {
+  res.send('Contest Hub Server is Running...');
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on PORT ${port}`);
 });
