@@ -310,3 +310,77 @@ app.get('/leaderBoard', async (req, res) => {
 
   res.send(result);
 });
+
+// =======================
+//     My Participations
+// =======================
+
+app.get('/myParticipateData/:email', async (req, res) => {
+  const email = req.params.email;
+  const result = await paymentsCollection.find({ email }).toArray();
+  res.send(result);
+});
+
+
+// =======================
+//       My Profile
+// =======================
+
+app.get('/user/myProfile/:email', async (req, res) => {
+  const email = req.params.email;
+
+  const result = await AllUserCollection.findOne({ email });
+
+  res.send(result);
+});
+
+app.patch('/update/profile/:email', async (req, res) => {
+  const email = req.params.email;
+  const body = req.body;
+
+  const updateDoc = { $set: body };
+  const result = await AllUserCollection.updateOne({ email }, updateDoc);
+
+  res.send(result);
+});
+
+
+// =======================
+//     Dashboard Stats
+// =======================
+
+// Upcoming contests
+app.get('/upcoming', async (req, res) => {
+  const result = await upcomingCollection.find().toArray();
+  res.send(result);
+});
+
+// Total contests
+app.get('/allData', async (req, res) => {
+  const total = await creatorContest.estimatedDocumentCount();
+  res.send({ total });
+});
+
+// Total users
+app.get('/allusers', async (req, res) => {
+  const total = await AllUserCollection.estimatedDocumentCount();
+  res.send({ total });
+});
+
+// Host contest count for a user
+app.get('/count/host/contest/:email', async (req, res) => {
+  const email = req.params.email;
+
+  const total = await creatorContest.countDocuments({ email });
+
+  res.send({ total });
+});
+
+// Count my payments
+app.get('/count/my/contest/:email', async (req, res) => {
+  const email = req.params.email;
+
+  const total = await paymentsCollection.countDocuments({ email });
+
+  res.send({ total });
+});
