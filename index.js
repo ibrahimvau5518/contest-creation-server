@@ -49,3 +49,27 @@ async function run() {
   }
 }
 run().catch(console.dir);
+
+var jwt = require('jsonwebtoken');
+
+app.post('/jwt', async (req, res) => {
+  const email = req.body;
+  const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: '7d',
+  });
+  res.send({ token });
+});
+
+const verifyToken = (req, res, next) => {
+  if (!req.headers.authorization) {
+    return res.status(401).send({ massage: 'unAuthorized' });
+  }
+  const token = req.headers.authorization.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: 'Unauthorized access' });
+    }
+    req.user = decoded;
+    next();
+  });
+};
