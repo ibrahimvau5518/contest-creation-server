@@ -269,3 +269,44 @@ app.post('/payments', async (req, res) => {
 
   res.send({ paymentResult, deleteResult });
 });
+
+
+// =======================
+//     Result Publish
+// =======================
+
+app.post('/setResult', async (req, res) => {
+  const resultData = req.body;
+  const result = await winCollection.insertOne(resultData);
+  res.send(result);
+});
+
+// Total winners count
+app.get('/total/winner', async (req, res) => {
+  const total = await winCollection.estimatedDocumentCount();
+  res.send({ total });
+});
+
+// My winning status
+app.get('/my-wining/status/:email', async (req, res) => {
+  const email = req.params.email;
+  const result = await winCollection.find({ email }).toArray();
+  res.send(result);
+});
+
+// Leaderboard
+app.get('/leaderBoard', async (req, res) => {
+  const result = await winCollection
+    .aggregate([
+      {
+        $group: {
+          _id: "$email",
+          totalWins: { $sum: 1 }
+        }
+      },
+      { $sort: { totalWins: -1 } }
+    ])
+    .toArray();
+
+  res.send(result);
+});
